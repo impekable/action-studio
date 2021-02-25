@@ -1,46 +1,60 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-require-imports */
+/* eslint-disable @typescript-eslint/no-var-requires */
 import * as core from '@actions/core'
 import * as github from '@actions/github'
 import twilio from 'twilio'
+import {FlowInstance} from 'twilio/lib/rest/studio/v2/flow'
 
-async function run(): Promise<void> {
+require('dotenv').config()
+
+async function run(): Promise<FlowInstance> {
+  const {context} = github
+  const masterFlow = core.getInput('masterFlow')
+
+  const accountSid =
+    core.getInput('TWILIO_ACCOUNT_SID') || process.env.TWILIO_ACCOUNT_SID
+  const apiKey = core.getInput('TWILIO_API_KEY') || process.env.TWILIO_API_KEY
+  const apiSecret =
+    core.getInput('TWILIO_API_SECRET') || process.env.TWILIO_API_SECRET
+
+  core.debug('Creating Flow')
+
+  const client = twilio(apiKey, apiSecret, {accountSid})
+
+  // eslint-disable-next-line no-console
+  console.log(context)
+
+  let definition: any = {}
+
+  if (masterFlow) {
+    const flow = await client.studio.flows(masterFlow).fetch()
+    definition = flow.definition
+  }
+
+  const flowInstance = await client.studio.flows.create({
+    commitMessage: `Twilio used Studio Control to create a project`,
+    friendlyName: 'Flow',
+    status: 'draft',
+    definition
+  })
+
+  core.debug('Flow Created!')
+
+  core.setOutput('flowSid', flowInstance.sid)
+
+  return flowInstance
+}
+
+async function execute(): Promise<FlowInstance | void> {
   try {
-    // eslint-disable-next-line no-console
-    console.log(github.context)
-
-    const from = core.getInput('fromPhoneNumber')
-    const to = core.getInput('toPhoneNumber')
-    const message = core.getInput('message')
-
-    const accountSid =
-      core.getInput('TWILIO_ACCOUNT_SID') || process.env.TWILIO_ACCOUNT_SID
-    const apiKey = core.getInput('TWILIO_API_KEY') || process.env.TWILIO_API_KEY
-    const apiSecret =
-      core.getInput('TWILIO_API_SECRET') || process.env.TWILIO_API_SECRET
-
-    core.debug('Sending SMS')
-
-    const client = twilio(apiKey, apiSecret, {accountSid})
-
-    const resultMessage = await client.messages.create({
-      from,
-      to,
-      body: message
-    })
-    core.debug('SMS sent!')
-
-    core.setOutput('messageSid', resultMessage.sid)
-    // const ms: string = core.getInput('milliseconds')
-    // core.debug(`Waiting ${ms} milliseconds ...`) // debug is only output if you set the secret `ACTIONS_RUNNER_DEBUG` to true
-
-    // core.debug(new Date().toTimeString())
-    // await wait(parseInt(ms, 10))
-    // core.debug(new Date().toTimeString())
-
-    // core.setOutput('time', new Date().toTimeString())
+    return await run()
   } catch ({message}) {
-    core.error(`Failed to send message: ${message}`)
+    core.error(`Failed to create flow:: ${message}`)
     core.setFailed(message)
   }
 }
 
-run()
+module.exports = execute
+
+execute()

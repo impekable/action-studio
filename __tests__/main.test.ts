@@ -1,28 +1,40 @@
-import {wait} from '../src/wait'
-import * as process from 'process'
-import * as cp from 'child_process'
-import * as path from 'path'
+const core = require('@actions/core')
+const twilio = require('twilio')
+const run = require('../lib/main.js')
 
-test('throws invalid number', async () => {
-  const input = parseInt('foo', 10)
-  await expect(wait(input)).rejects.toThrow('milliseconds not a number')
+jest.mock('@actions/core')
+jest.mock('twilio')
+
+test('Log failures', async () => {
+  const errorMessage = 'Error from twilio'
+
+  twilio.mockImplementation(() => {
+    throw new Error(errorMessage)
+  })
+
+  await run()
+
+  expect(core.error.mock.calls).toEqual(
+    expect.arrayContaining([[`Failed to create flow:: ${errorMessage}`]])
+  )
+
+  expect(core.setFailed.mock.calls).toEqual(
+    expect.arrayContaining([[errorMessage]])
+  )
 })
 
-test('wait 500 ms', async () => {
-  const start = new Date()
-  await wait(500)
-  const end = new Date()
-  var delta = Math.abs(end.getTime() - start.getTime())
-  expect(delta).toBeGreaterThan(450)
-})
+test('Returns message sid', async () => {
+  const sid = 'ID123'
 
-// shows how the runner will run a javascript action with env / stdout protocol
-test('test runs', () => {
-  process.env['INPUT_MILLISECONDS'] = '500'
-  const np = process.execPath
-  const ip = path.join(__dirname, '..', 'lib', 'main.js')
-  const options: cp.ExecFileSyncOptions = {
-    env: process.env
-  }
-  console.log(cp.execFileSync(np, [ip], options).toString())
+  twilio.mockReturnValue({
+    studio: {
+      flows: {
+        fetch: () => ({sid}),
+        create: () => ({sid})
+      }
+    }
+  })
+
+  const {sid: resultSid} = await run()
+  expect(resultSid).toEqual(sid)
 })
