@@ -147,7 +147,8 @@ export async function merge(options: createOptions): Promise<void> {
   await octokit.repos.uploadReleaseAsset({
     owner,
     repo,
+    name: `${master.sid}.json`,
     release_id: data.id,
-    data: master.toJSON()
+    data: JSON.stringify(master.toJSON())
   })
 }
