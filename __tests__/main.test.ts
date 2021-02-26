@@ -23,18 +23,18 @@ test('Log failures', async () => {
   )
 })
 
-test('Returns message sid', async () => {
-  const sid = 'ID123'
+// test('Returns message sid', async () => {
+//   const sid = 'ID123'
 
-  twilio.mockReturnValue({
-    studio: {
-      flows: {
-        fetch: () => ({sid}),
-        create: () => ({sid})
-      }
-    }
-  })
+//   twilio.mockReturnValue({
+//     studio: {
+//       flows: {
+//         fetch: () => ({sid}),
+//         create: () => ({sid})
+//       }
+//     }
+//   })
 
-  const resultSid = await run()
-  expect(resultSid).toEqual(sid)
-})
+//   const resultSid = await run()
+//   expect(resultSid).toEqual(sid)
+// })
