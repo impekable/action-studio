@@ -25,4 +25,4 @@ jobs:
       - uses: actions/checkout@v2
       - uses: ./
         with:
-          milliseconds: 1000
+          masterFlow: FW41c48a1cc7a87b98708641d7a6339f97
