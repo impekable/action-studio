@@ -1,11 +1,25 @@
-name: 'Your name here'
-description: 'Provide a description here'
-author: 'Your name or organization here'
+name: 'Impekable Twilio Studio Control'
+author: 'Impekable'
+description: 'Automated version control for Twilio Studio Flows'
 inputs:
-  milliseconds: # change this
+  masterFlow:
+    description: 'The main flow'
+    required: false
+  TWILIO_ACCOUNT_SID:
+    description: 'A Twilio Account SID. Can alternatively be stored in environment'
     required: true
-    description: 'input description here'
-    default: 'default value if applicable'
+  TWILIO_API_KEY:
+    description: 'A Twilio API Key. Can alternatively be stored in environment'
+    required: true
+  TWILIO_API_SECRET:
+    description: 'A Twilio API Secret. Can alternatively be stored in environment'
+    required: true
+outputs:
+  messageSid:
+    description: 'The Twilio Flow SID'
 runs:
   using: 'node12'
-  main: 'dist/index.js'
+  main: 'dist/main.js'
+branding:
+  color: 'red'
+  icon: 'message-circle'
