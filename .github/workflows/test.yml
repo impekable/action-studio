@@ -4,6 +4,7 @@ on:
     branches:
       - 'studio/*'
   pull_request:
+    types: [ closed ]
     branches:
       - 'main'
 

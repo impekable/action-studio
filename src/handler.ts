@@ -73,7 +73,7 @@ export async function create(options: createOptions): Promise<string> {
     repo,
     owner,
     path,
-    message: 'Created initial configuration file',
+    message: `${flowInstance.friendlyName} created at ${flowInstance.url} (SID: ${flowInstance.sid})`,
     content: Buffer.from(JSON.stringify(flowJSON)).toString('base64'),
     branch
   })
