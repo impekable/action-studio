@@ -1,16 +1,16 @@
 /* eslint-disable no-console */
 /* eslint-disable @typescript-eslint/no-require-imports */
 /* eslint-disable @typescript-eslint/no-var-requires */
+import twilio from 'twilio'
 import * as core from '@actions/core'
 import * as github from '@actions/github'
-import twilio from 'twilio'
 import * as handler from './handler'
 
 require('dotenv').config()
 
 async function run(): Promise<string> {
   const {payload, eventName} = github.context
-  const {ref: branch, ref_type: refType, sender} = payload
+  const {ref: branch, ref_type: refType, sender, repository} = payload
   const masterFlow = core.getInput('masterFlow')
 
   const accountSid =
@@ -36,7 +36,9 @@ async function run(): Promise<string> {
         client,
         masterFlow,
         branch,
-        githubUsername: sender?.login || ''
+        githubUsername: sender?.login || '',
+        repo: repository?.name || '',
+        owner: repository?.owner.login || ''
       })
     }
   }
