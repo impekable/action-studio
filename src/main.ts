@@ -14,8 +14,7 @@ async function run(): Promise<string> {
     ref_type: refType,
     sender,
     repository,
-    pull_request: pullRequest,
-    action
+    pull_request: pullRequest
   } = payload
   const masterFlow = core.getInput('masterFlow')
   const githubToken = core.getInput('githubToken')

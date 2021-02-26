@@ -96,7 +96,8 @@ export async function merge(options: createOptions): Promise<void> {
   const configFile = await octokit.repos.getContent({
     owner,
     repo,
-    path
+    path,
+    ref: branch
   })
 
   const studioConfig = JSON.parse(
