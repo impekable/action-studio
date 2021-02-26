@@ -14,7 +14,8 @@ async function run(): Promise<string> {
     ref_type: refType,
     sender,
     repository,
-    pull_request: pullRequest
+    pull_request: pullRequest,
+    action
   } = payload
   const masterFlow = core.getInput('masterFlow')
   const githubToken = core.getInput('githubToken')
@@ -52,7 +53,7 @@ async function run(): Promise<string> {
   }
 
   // studio/* merge to main accepted
-  if (eventName === 'pull_request') {
+  if (action === 'closed' && eventName === 'pull_request') {
     if (pullRequest && pullRequest?.merged) {
       await handler.merge(config)
     }
