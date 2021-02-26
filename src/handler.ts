@@ -93,6 +93,16 @@ export async function merge(options: createOptions): Promise<void> {
 
   const octokit = github.getOctokit(githubToken)
 
+  // eslint-disable-next-line no-console
+  console.log(
+    JSON.stringify({
+      owner,
+      repo,
+      path,
+      ref: branch
+    })
+  )
+
   const configFile = await octokit.repos.getContent({
     owner,
     repo,
@@ -103,9 +113,6 @@ export async function merge(options: createOptions): Promise<void> {
   const studioConfig = JSON.parse(
     Buffer.from((configFile.data as any).content, 'base64').toString()
   )
-
-  // eslint-disable-next-line no-console
-  console.log(JSON.stringify({studioConfig}))
 
   const {friendlyName, definition} = await client.studio
     .flows(studioConfig.sid)
