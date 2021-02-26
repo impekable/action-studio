@@ -2,15 +2,9 @@ name: 'Impekable Twilio Studio Control'
 author: 'Impekable'
 description: 'Automated version control for Twilio Studio Flows'
 inputs:
-  fromPhoneNumber:
-    description: 'Phone number in your Twilio account to send the SMS from'
-    required: true
-  toPhoneNumber:
-    description: 'Phone number to send the SMS to'
-    required: true
-  message:
-    description: 'The message you want to send'
-    required: true
+  masterFlow:
+    description: 'The main flow'
+    required: false
   TWILIO_ACCOUNT_SID:
     description: 'A Twilio Account SID. Can alternatively be stored in environment'
     required: true
@@ -22,7 +16,7 @@ inputs:
     required: true
 outputs:
   messageSid:
-    description: 'The Twilio Message SID'
+    description: 'The Twilio Flow SID'
 runs:
   using: 'node12'
   main: 'dist/main.js'
