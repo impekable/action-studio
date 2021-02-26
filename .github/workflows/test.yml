@@ -4,8 +4,8 @@ on:
     branches:
       - 'studio/*'
   pull_request:
+    types: [ closed ]
     branches:
-      types: [ closed ]
       - 'main'
 
 jobs:
