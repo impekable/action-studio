@@ -24,7 +24,7 @@ export async function create(options: createOptions): Promise<string> {
 
   const flowInstance = await client.studio.flows.create({
     commitMessage: `${githubUsername} used Studio Control to create a project`,
-    friendlyName: `${githubUsername} development flow. Branch${branch}`,
+    friendlyName: `${githubUsername} flow. (Branch: ${branch})`,
     status: 'draft',
     definition
   })
@@ -32,10 +32,7 @@ export async function create(options: createOptions): Promise<string> {
   const githubToken = core.getInput('githubToken') || process.env.GITHUB_TOKEN
 
   if (githubToken) {
-    const config = {
-      flowSid: flowInstance.sid,
-      flowJSON: flowInstance.toJSON()
-    }
+    const flowJSON = flowInstance.toJSON()
 
     const octokit = github.getOctokit(githubToken)
     await octokit.repos.createOrUpdateFileContents({
@@ -43,7 +40,7 @@ export async function create(options: createOptions): Promise<string> {
       owner,
       path: '.studio.json',
       message: 'Created initial configuration file',
-      content: Buffer.from(JSON.stringify(config)).toString('base64'),
+      content: Buffer.from(JSON.stringify(flowJSON)).toString('base64'),
       branch
     })
   }
