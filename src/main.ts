@@ -12,6 +12,7 @@ async function run(): Promise<string> {
   const {payload, eventName} = github.context
   const {ref: branch, ref_type: refType, sender, repository} = payload
   const masterFlow = core.getInput('masterFlow')
+  const githubToken = core.getInput('githubToken')
 
   const accountSid =
     core.getInput('TWILIO_ACCOUNT_SID') || process.env.TWILIO_ACCOUNT_SID
@@ -21,6 +22,7 @@ async function run(): Promise<string> {
 
   core.debug('Creating Flow')
   console.log(JSON.stringify(github.context))
+  console.log(JSON.stringify({masterFlow, githubToken}))
 
   const client = twilio(apiKey, apiSecret, {accountSid})
 
