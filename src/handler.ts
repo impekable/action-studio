@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import twilio from 'twilio'
 import * as core from '@actions/core'
@@ -30,6 +31,8 @@ export async function create(options: createOptions): Promise<string> {
   })
 
   const githubToken = core.getInput('githubToken') || process.env.GITHUB_TOKEN
+
+  console.log('TOKEN', githubToken)
 
   if (githubToken) {
     const octokit = github.getOctokit(githubToken)
