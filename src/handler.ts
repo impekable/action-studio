@@ -32,16 +32,19 @@ export async function create(options: createOptions): Promise<string> {
 
   const githubToken = core.getInput('githubToken') || process.env.GITHUB_TOKEN
 
-  console.log('TOKEN', githubToken)
-
   if (githubToken) {
+    const config = {
+      flowSid: flowInstance.sid,
+      flowJSON: flowInstance.toJSON()
+    }
+
     const octokit = github.getOctokit(githubToken)
     await octokit.repos.createOrUpdateFileContents({
       repo,
       owner,
       path: '.studio.json',
-      message: 'Initial configuration file',
-      content: Buffer.from(JSON.stringify(definition)).toString('base64'),
+      message: 'Created initial configuration file',
+      content: Buffer.from(JSON.stringify(config)).toString('base64'),
       branch
     })
   }
