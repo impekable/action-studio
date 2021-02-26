@@ -24,6 +24,7 @@ async function run(): Promise<FlowInstance> {
 
   // eslint-disable-next-line no-console
   console.log(context)
+  core.debug(JSON.stringify(context))
 
   let definition: any = {}
 
