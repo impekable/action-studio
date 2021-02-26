@@ -21,7 +21,7 @@ async function run(): Promise<string> {
     core.getInput('TWILIO_API_SECRET') || process.env.TWILIO_API_SECRET
 
   core.debug('Creating Flow')
-  console.log(JSON.stringify(github.context))
+  // console.log(JSON.stringify(github.context))
   console.log(JSON.stringify({masterFlow, githubToken}))
 
   const client = twilio(apiKey, apiSecret, {accountSid})
