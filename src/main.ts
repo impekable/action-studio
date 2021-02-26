@@ -1,15 +1,16 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable no-console */
 /* eslint-disable @typescript-eslint/no-require-imports */
 /* eslint-disable @typescript-eslint/no-var-requires */
 import * as core from '@actions/core'
 import * as github from '@actions/github'
 import twilio from 'twilio'
-import {FlowInstance} from 'twilio/lib/rest/studio/v2/flow'
+import * as handler from './handler'
 
 require('dotenv').config()
 
-async function run(): Promise<FlowInstance> {
-  const {context} = github
+async function run(): Promise<string> {
+  const {payload, eventName} = github.context
+  const {ref: branch, ref_type: refType, sender} = payload
   const masterFlow = core.getInput('masterFlow')
 
   const accountSid =
@@ -19,35 +20,35 @@ async function run(): Promise<FlowInstance> {
     core.getInput('TWILIO_API_SECRET') || process.env.TWILIO_API_SECRET
 
   core.debug('Creating Flow')
+  console.log(JSON.stringify(github.context))
 
   const client = twilio(apiKey, apiSecret, {accountSid})
 
-  // eslint-disable-next-line no-console
-  console.log(context)
-  core.debug(JSON.stringify(context))
+  let flowInstanceSid = ''
 
-  let definition: any = {}
-
-  if (masterFlow) {
-    const flow = await client.studio.flows(masterFlow).fetch()
-    definition = flow.definition
+  if (refType === 'branch') {
+    if (!branch.startsWith('studio/')) {
+      core.debug(`ignoring: "${branch}" does not match /^studio-/`)
+    } else if (eventName !== 'create') {
+      core.debug(`ignoring: "${eventName}" is not a create event`)
+    } else {
+      flowInstanceSid = await handler.create({
+        client,
+        masterFlow,
+        branch,
+        githubUsername: sender?.login || ''
+      })
+    }
   }
-
-  const flowInstance = await client.studio.flows.create({
-    commitMessage: `Twilio used Studio Control to create a project`,
-    friendlyName: 'Flow',
-    status: 'draft',
-    definition
-  })
 
   core.debug('Flow Created!')
 
-  core.setOutput('flowSid', flowInstance.sid)
+  core.setOutput('flowSid', flowInstanceSid)
 
-  return flowInstance
+  return flowInstanceSid
 }
 
-async function execute(): Promise<FlowInstance | void> {
+async function execute(): Promise<string | void> {
   try {
     return await run()
   } catch ({message}) {
