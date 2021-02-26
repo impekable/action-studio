@@ -1,15 +1,19 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import twilio from 'twilio'
+import * as core from '@actions/core'
+import * as github from '@actions/github'
 
 type createOptions = {
   client: twilio.Twilio
   masterFlow: string
   branch: string
   githubUsername: string
+  repo: string
+  owner: string
 }
 
 export async function create(options: createOptions): Promise<string> {
-  const {branch, client, masterFlow, githubUsername} = options
+  const {repo, owner, branch, client, masterFlow, githubUsername} = options
 
   let definition: any = {}
 
@@ -24,6 +28,20 @@ export async function create(options: createOptions): Promise<string> {
     status: 'draft',
     definition
   })
+
+  const githubToken = core.getInput('GITHUB_TOKEN') || process.env.GITHUB_TOKEN
+
+  if (githubToken) {
+    const octokit = github.getOctokit(githubToken)
+    await octokit.repos.createOrUpdateFileContents({
+      repo,
+      owner,
+      path: '.studio.json',
+      message: 'Initial configuration file',
+      content: Buffer.from(JSON.stringify(definition)).toString('base64'),
+      branch
+    })
+  }
 
   return flowInstance.sid
 }
