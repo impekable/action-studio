@@ -5,6 +5,9 @@ inputs:
   masterFlow:
     description: 'The main flow'
     required: false
+  githubToken:
+    description: 'Github token to create json files'
+    required: false
   TWILIO_ACCOUNT_SID:
     description: 'A Twilio Account SID. Can alternatively be stored in environment'
     required: true
