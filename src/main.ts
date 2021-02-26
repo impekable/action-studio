@@ -10,8 +10,15 @@ require('dotenv').config()
 
 async function run(): Promise<string> {
   const {payload, eventName} = github.context
-  const {ref: branch, ref_type: refType, sender, repository} = payload
+  const {
+    ref: branch,
+    ref_type: refType,
+    sender,
+    repository,
+    pull_request: pullRequest
+  } = payload
   const masterFlow = core.getInput('masterFlow')
+  const githubToken = core.getInput('githubToken')
 
   const accountSid =
     core.getInput('TWILIO_ACCOUNT_SID') || process.env.TWILIO_ACCOUNT_SID
@@ -24,28 +31,38 @@ async function run(): Promise<string> {
 
   const client = twilio(apiKey, apiSecret, {accountSid})
 
+  const config = {
+    client,
+    githubToken,
+    masterFlow,
+    branch,
+    githubUsername: sender?.login || '',
+    repo: repository?.name || '',
+    owner: repository?.owner.login || ''
+  }
+
   let flowInstanceSid = ''
 
-  if (refType === 'branch') {
+  // studio/* branch created
+  if (eventName === 'create' && refType === 'branch') {
     if (!branch.startsWith('studio/')) {
       core.debug(`ignoring: "${branch}" does not match /^studio-/`)
-    } else if (eventName !== 'create') {
-      core.debug(`ignoring: "${eventName}" is not a create event`)
     } else {
-      flowInstanceSid = await handler.create({
-        client,
-        masterFlow,
-        branch,
-        githubUsername: sender?.login || '',
-        repo: repository?.name || '',
-        owner: repository?.owner.login || ''
-      })
+      flowInstanceSid = await handler.create(config)
     }
   }
 
-  core.debug('Flow Created!')
+  // studio/* merge to main accepted
+  // IMPORTANT: Make merged in prod
+  if (eventName === 'pull_request') {
+    if (pullRequest && !pullRequest?.merged) {
+      await handler.merge(config)
+    }
+  }
 
-  core.setOutput('flowSid', flowInstanceSid)
+  // core.debug('Flow Created!')
+
+  // core.setOutput('flowSid', flowInstanceSid)
 
   return flowInstanceSid
 }
