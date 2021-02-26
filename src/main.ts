@@ -53,10 +53,8 @@ async function run(): Promise<string> {
 
   // studio/* merge to main accepted
   if (eventName === 'pull_request') {
-    // eslint-disable-next-line no-console
-    console.log(JSON.stringify(github.context))
     if (pullRequest && !pullRequest?.merged) {
-      await handler.merge(config)
+      await handler.merge({...config, branch: pullRequest.head.ref})
     }
   }
 
