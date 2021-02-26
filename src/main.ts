@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 /* eslint-disable @typescript-eslint/no-require-imports */
 /* eslint-disable @typescript-eslint/no-var-requires */
 import twilio from 'twilio'
@@ -27,7 +26,7 @@ async function run(): Promise<string> {
     core.getInput('TWILIO_API_SECRET') || process.env.TWILIO_API_SECRET
 
   core.debug('Creating Flow')
-  console.log(JSON.stringify(github))
+  // console.log(JSON.stringify(github))
 
   const client = twilio(apiKey, apiSecret, {accountSid})
 
@@ -53,9 +52,8 @@ async function run(): Promise<string> {
   }
 
   // studio/* merge to main accepted
-  // IMPORTANT: Make merged in prod
   if (eventName === 'pull_request') {
-    if (pullRequest && !pullRequest?.merged) {
+    if (pullRequest && pullRequest?.merged) {
       await handler.merge(config)
     }
   }

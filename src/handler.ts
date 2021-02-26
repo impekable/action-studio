@@ -103,6 +103,9 @@ export async function merge(options: createOptions): Promise<void> {
     Buffer.from((configFile.data as any).content, 'base64').toString()
   )
 
+  // eslint-disable-next-line no-console
+  console.log(JSON.stringify(studioConfig))
+
   const {friendlyName, definition} = await client.studio
     .flows(studioConfig.sid)
     .fetch()
