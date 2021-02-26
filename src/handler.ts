@@ -104,7 +104,7 @@ export async function merge(options: createOptions): Promise<void> {
   )
 
   // eslint-disable-next-line no-console
-  console.log(JSON.stringify(studioConfig))
+  console.log(JSON.stringify({studioConfig}))
 
   const {friendlyName, definition} = await client.studio
     .flows(studioConfig.sid)
