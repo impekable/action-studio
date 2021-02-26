@@ -29,7 +29,7 @@ export async function create(options: createOptions): Promise<string> {
     definition
   })
 
-  const githubToken = core.getInput('GITHUB_TOKEN') || process.env.GITHUB_TOKEN
+  const githubToken = core.getInput('githubToken') || process.env.GITHUB_TOKEN
 
   if (githubToken) {
     const octokit = github.getOctokit(githubToken)
