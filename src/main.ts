@@ -37,7 +37,8 @@ async function run(): Promise<string> {
     branch,
     githubUsername: sender?.login || '',
     repo: repository?.name || '',
-    owner: repository?.owner.login || ''
+    owner: repository?.owner.login || '',
+    defaultBranch: repository?.default_branch || 'main'
   }
 
   let flowInstanceSid = ''

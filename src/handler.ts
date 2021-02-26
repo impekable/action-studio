@@ -13,6 +13,7 @@ type createOptions = {
   githubUsername: string
   repo: string
   owner: string
+  defaultBranch: string
 }
 
 export async function create(options: createOptions): Promise<string> {
@@ -82,7 +83,15 @@ export async function create(options: createOptions): Promise<string> {
 }
 
 export async function merge(options: createOptions): Promise<void> {
-  const {repo, owner, branch, client, masterFlow, githubToken} = options
+  const {
+    repo,
+    owner,
+    branch,
+    client,
+    masterFlow,
+    githubToken,
+    defaultBranch
+  } = options
 
   if (!githubToken) {
     core.setFailed(
@@ -92,16 +101,6 @@ export async function merge(options: createOptions): Promise<void> {
   }
 
   const octokit = github.getOctokit(githubToken)
-
-  // eslint-disable-next-line no-console
-  console.log(
-    JSON.stringify({
-      owner,
-      repo,
-      path,
-      ref: branch
-    })
-  )
 
   const configFile = await octokit.repos.getContent({
     owner,
@@ -131,8 +130,9 @@ export async function merge(options: createOptions): Promise<void> {
     owner,
     path,
     message: commitMessage,
+    sha: (configFile.data as any).sha,
     content: Buffer.from(JSON.stringify(master.toJSON())).toString('base64'),
-    branch
+    branch: defaultBranch
   })
 
   // create release
