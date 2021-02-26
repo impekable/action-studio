@@ -53,7 +53,7 @@ async function run(): Promise<string> {
 
   // studio/* merge to main accepted
   if (eventName === 'pull_request') {
-    if (pullRequest && pullRequest?.merged) {
+    if (pullRequest && !pullRequest?.merged) {
       await handler.merge(config)
     }
   }
