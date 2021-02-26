@@ -35,6 +35,6 @@ test('Returns message sid', async () => {
     }
   })
 
-  const {sid: resultSid} = await run()
+  const resultSid = await run()
   expect(resultSid).toEqual(sid)
 })
