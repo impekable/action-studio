@@ -28,6 +28,9 @@ async function run(): Promise<string> {
   core.debug('Creating Flow')
   // console.log(JSON.stringify(github))
 
+  // eslint-disable-next-line no-console
+  console.log('Token::: ', process.env.GITHUB_TOKEN)
+
   const client = twilio(apiKey, apiSecret, {accountSid})
 
   const config = {

@@ -113,17 +113,17 @@ export async function merge(options: createOptions): Promise<void> {
     Buffer.from((configFile.data as any).content, 'base64').toString()
   )
 
-  const {friendlyName, definition} = await client.studio
-    .flows(studioConfig.sid)
-    .fetch()
+  const current = await client.studio.flows(studioConfig.sid).fetch()
 
-  const commitMessage = `Merged ${friendlyName} to master and updated .studio.json`
+  const commitMessage = `Merged ${current.friendlyName} to production flow and updated .studio.json`
 
   const master = await client.studio.flows(masterFlow).update({
     status: 'published',
     commitMessage,
-    definition
+    definition: current.definition
   })
+
+  const masterJSON = JSON.stringify(master.toJSON())
 
   await octokit.repos.createOrUpdateFileContents({
     repo,
@@ -131,7 +131,7 @@ export async function merge(options: createOptions): Promise<void> {
     path,
     message: commitMessage,
     sha: (configFile.data as any).sha,
-    content: Buffer.from(JSON.stringify(master.toJSON())).toString('base64'),
+    content: Buffer.from(masterJSON).toString('base64'),
     branch: defaultBranch
   })
 
@@ -140,15 +140,15 @@ export async function merge(options: createOptions): Promise<void> {
     owner,
     repo,
     body: master.commitMessage,
-    tag_name: `v${master.sid}`,
-    name: `Release ${master.sid}`
+    tag_name: `v${current.sid}`,
+    name: `Release ${current.sid} (${current.friendlyName})`
   })
 
   await octokit.repos.uploadReleaseAsset({
     owner,
     repo,
-    name: `${master.sid}.json`,
+    name: `${current.sid}.json`,
     release_id: data.id,
-    data: JSON.stringify(master.toJSON())
+    data: masterJSON
   })
 }

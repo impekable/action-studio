@@ -14,12 +14,11 @@ Automated version control for Twilio Studio Flows.
 2. Add the following to your workflow
 
 ```yml
-- name: 'Sending SMS Notification'
+- name: 'Automated version control for Twilio Studio Flows'
   uses: impekable/actions-studio@v1
   with:
-    fromPhoneNumber: '+1(234)5678901'
-    toPhoneNumber: '+1(234)3334444'
-    message: 'Hello from Twilio'
+    masterFlow: FW4xxxxxxxxxxxx
+    githubToken: ${{ secrets.GITHUB_TOKEN }}
   env:
     TWILIO_ACCOUNT_SID: ${{ secrets.TWILIO_ACCOUNT_SID }}
     TWILIO_API_KEY: ${{ secrets.TWILIO_API_KEY }}
@@ -28,17 +27,13 @@ Automated version control for Twilio Studio Flows.
 
 ## Inputs
 
-### `fromPhoneNumber`
+### `masterFlow`
 
-**Required** Phone number in your Twilio account to send the SMS from
+**Required** The main flow
 
-### `toPhoneNumber`
+### `githubToken`
 
-**Required** Phone number to send the SMS to
-
-### `message`
-
-**Required** The message you want to send
+**Required** Github token to create json files
 
 ### `TWILIO_ACCOUNT_SID`
 
@@ -51,12 +46,6 @@ A Twilio API Key. Can alternatively be stored in environment
 ### `TWILIO_API_SECRET`
 
 A Twilio API Secret. Can alternatively be stored in environment
-
-## Outputs
-
-### `messageSid`
-
-The SID of the [message resource](https://www.twilio.com/docs/sms/api/message-resource#message-properties) associated with the SMS sent.
 
 ## Contributing
 
