@@ -2,24 +2,30 @@ name: 'Impekable Twilio Studio Control'
 author: 'Impekable'
 description: 'Automated version control for Twilio Studio Flows'
 inputs:
-  masterFlow:
-    description: 'The main flow'
+  twilio-master-flow-sid:
+    description: 'The sid of the main flow that you want the development flows to be based on'
     required: false
-  githubToken:
-    description: 'Github token to create json files'
+  github-token:
+    description: 'Github token to create json files. This does not need to be filled out manually. Github automatically fills in secrets.GITHUB_TOKEN'
     required: true
-  TWILIO_ACCOUNT_SID:
-    description: 'A Twilio Account SID. Can alternatively be stored in environment'
+  TWILIO_ACCOUNT_SID_PRODUCTION:
+    description: 'Twilio Account SID for production environment'
     required: true
-  TWILIO_API_KEY:
-    description: 'A Twilio API Key. Can alternatively be stored in environment'
+  TWILIO_API_KEY_PRODUCTION:
+    description: 'Twilio API Key for production environment'
     required: true
-  TWILIO_API_SECRET:
-    description: 'A Twilio API Secret. Can alternatively be stored in environment'
+  TWILIO_API_SECRET_PRODUCTION:
+    description: 'Twilio API Secret for production environment'
     required: true
-outputs:
-  messageSid:
-    description: 'The Twilio Flow SID'
+  TWILIO_ACCOUNT_SID_DEVELOPMENT:
+    description: 'Twilio Account SID for development environment'
+    required: true
+  TWILIO_API_KEY_DEVELOPMENT:
+    description: 'Twilio API Key for development environment'
+    required: true
+  TWILIO_API_SECRET_DEVELOPMENT:
+    description: 'Twilio API Secret for development environment'
+    required: true
 runs:
   using: 'node12'
   main: 'dist/index.js'

@@ -4,48 +4,86 @@ Automated version control for Twilio Studio Flows.
 
 ## Prerequisites
 
-- A Twilio Account. [Sign up for free](https://www.twilio.com/try-twilio)
+- A Twilio Account. [Get twilio credentials](https://www.twilio.com/console)
 - A [Twilio API Key and Secret](https://www.twilio.com/docs/iam/keys/api-key)
 
 ## Usage
 
-1. Set up your credentials as secrets in your repository settings using `TWILIO_ACCOUNT_SID`, `TWILIO_API_KEY`, `TWILIO_API_SECRET`
+1. Set up the credentials of the clients production environment as secrets in your repository settings using `TWILIO_ACCOUNT_SID_PRODUCTION`, `TWILIO_API_KEY_PRODUCTION`, `TWILIO_API_SECRET_PRODUCTION`
 
-2. Add the following to your workflow
+2. Set up the credentials of the development production environment as secrets in your repository settings using `TWILIO_ACCOUNT_SID_DEVELOPMENT`, `TWILIO_API_KEY_DEVELOPMENT`, `TWILIO_API_SECRET_DEVELOPMENT`
+
+3. Add the following to your workflow
 
 ```yml
-- name: 'Automated version control for Twilio Studio Flows'
-  uses: impekable/actions-studio@v1
-  with:
-    masterFlow: FW4xxxxxxxxxxxx
-    githubToken: ${{ secrets.GITHUB_TOKEN }}
-  env:
-    TWILIO_ACCOUNT_SID: ${{ secrets.TWILIO_ACCOUNT_SID }}
-    TWILIO_API_KEY: ${{ secrets.TWILIO_API_KEY }}
-    TWILIO_API_SECRET: ${{ secrets.TWILIO_API_SECRET }}
+  name: 'Deploy to Studio'
+  on:
+    create:
+      branches:
+        - 'studio/*'
+    pull_request:
+      types: [ closed ]
+      branches:
+        - 'main'
+        - 'master'
+
+    run_studio_control:
+      runs-on: ubuntu-latest
+      steps:
+        - name: Checkout Repo
+          uses: actions/checkout@v2
+        - name: Create and Deploy
+          uses: impekable/actions-studio@main
+          with:
+            twilio-master-flow-sid: ${{ secrets.TWILIO_MASTER_FLOW_SID }}
+            github-token: ${{ secrets.GITHUB_TOKEN }}
+          env:
+            TWILIO_ACCOUNT_SID_PRODUCTION: ${{ secrets.TWILIO_ACCOUNT_SID_PRODUCTION }}
+            TWILIO_API_KEY_PRODUCTION: ${{ secrets.TWILIO_API_KEY_PRODUCTION }}
+            TWILIO_API_SECRET_PRODUCTION: ${{ secrets.TWILIO_API_SECRET_PRODUCTION }}
+            TWILIO_ACCOUNT_SID_DEVELOPMENT: ${{ secrets.TWILIO_ACCOUNT_SID_DEVELOPMENT }}
+            TWILIO_API_KEY_DEVELOPMENT: ${{ secrets.TWILIO_API_KEY_DEVELOPMENT }}
+            TWILIO_API_SECRET_DEVELOPMENT: ${{ secrets.TWILIO_API_SECRET_DEVELOPMENT }}
+
 ```
 
 ## Inputs
 
-### `masterFlow`
+### `twilio-master-flow-sid`
 
-**Required** The main flow
+**Optional** The sid of the main flow that you want the development flows to be based on
 
-### `githubToken`
+### `github-token`
 
-**Required** Github token to create json files
+**Required** Github token to create json files. This does not need to be filled out manually. Github automatically fills in `secrets.GITHUB_TOKEN`
 
-### `TWILIO_ACCOUNT_SID`
+## Production Secrets
 
-A Twilio Account SID. Can alternatively be stored in environment
+### `TWILIO_ACCOUNT_SID_PRODUCTION`
 
-### `TWILIO_API_KEY`
+Twilio Account SID for production environment
 
-A Twilio API Key. Can alternatively be stored in environment
+### `TWILIO_API_KEY_PRODUCTION`
 
-### `TWILIO_API_SECRET`
+Twilio API Key for production environment
 
-A Twilio API Secret. Can alternatively be stored in environment
+### `TWILIO_API_SECRET_PRODUCTION`
+
+Twilio API Secret for production environment
+
+## Development Secrets
+
+### `TWILIO_ACCOUNT_SID_DEVELOPMENT`
+
+Twilio Account SID for development environment
+
+### `TWILIO_API_KEY_DEVELOPMENT`
+
+Twilio API Key for development environment
+
+### `TWILIO_API_SECRET_DEVELOPMENT`
+
+Twilio API Secret for development environment
 
 ## Contributing
 

@@ -1,13 +1,15 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import twilio from 'twilio'
 import * as github from '@actions/github'
-import * as core from '@actions/core'
 
 const path = '.studio.json'
 
 type createOptions = {
-  githubToken?: string
-  client: twilio.Twilio
+  githubToken: string
+  client: {
+    production: twilio.Twilio
+    development: twilio.Twilio
+  }
   masterFlow: string
   branch: string
   githubUsername: string
@@ -27,15 +29,8 @@ export async function create(options: createOptions): Promise<string> {
     githubToken
   } = options
 
-  if (!githubToken) {
-    core.setFailed(
-      `GITHUB_TOKEN is required but got ${process.env.GITHUB_TOKEN}`
-    )
-    return ''
-  }
-
   let definition: any = {
-    description: 'A New Flow',
+    description: `Twilio Studio Flow (${githubUsername})`,
     states: [
       {
         name: 'Trigger',
@@ -56,11 +51,11 @@ export async function create(options: createOptions): Promise<string> {
   }
 
   if (masterFlow) {
-    const flow = await client.studio.flows(masterFlow).fetch()
+    const flow = await client.production.studio.flows(masterFlow).fetch()
     definition = flow.definition
   }
 
-  const flowInstance = await client.studio.flows.create({
+  const flowInstance = await client.development.studio.flows.create({
     commitMessage: `${githubUsername} used Studio Control to create a project`,
     friendlyName: `${githubUsername} flow. (Branch: ${branch})`,
     status: 'published',
@@ -70,11 +65,12 @@ export async function create(options: createOptions): Promise<string> {
   const flowJSON = flowInstance.toJSON()
 
   const octokit = github.getOctokit(githubToken)
+
   await octokit.repos.createOrUpdateFileContents({
     repo,
     owner,
     path,
-    message: `${flowInstance.friendlyName} created at ${flowInstance.url} (SID: ${flowInstance.sid})`,
+    message: `${flowInstance.friendlyName} generated flow. SID: ${flowInstance.sid}`,
     content: Buffer.from(JSON.stringify(flowJSON)).toString('base64'),
     branch
   })
@@ -93,13 +89,6 @@ export async function merge(options: createOptions): Promise<void> {
     defaultBranch
   } = options
 
-  if (!githubToken) {
-    core.setFailed(
-      `GITHUB_TOKEN is required but got ${process.env.GITHUB_TOKEN}`
-    )
-    return
-  }
-
   const octokit = github.getOctokit(githubToken)
 
   const configFile = await octokit.repos.getContent({
@@ -109,15 +98,19 @@ export async function merge(options: createOptions): Promise<void> {
     ref: branch
   })
 
+  const configData = configFile.data as any
+
   const studioConfig = JSON.parse(
-    Buffer.from((configFile.data as any).content, 'base64').toString()
+    Buffer.from(configData.content, 'base64').toString()
   )
 
-  const current = await client.studio.flows(studioConfig.sid).fetch()
+  const current = await client.development.studio
+    .flows(studioConfig.sid)
+    .fetch()
 
-  const commitMessage = `Merged ${current.friendlyName} to production flow and updated .studio.json`
+  const commitMessage = `Merged ${current.friendlyName} to production flow on twilio. Updated .studio.json on github. Created a github release ${current.sid}.json.`
 
-  const master = await client.studio.flows(masterFlow).update({
+  const master = await client.production.studio.flows(masterFlow).update({
     status: 'published',
     commitMessage,
     definition: current.definition
@@ -130,7 +123,7 @@ export async function merge(options: createOptions): Promise<void> {
     owner,
     path,
     message: commitMessage,
-    sha: (configFile.data as any).sha,
+    sha: configData.sha,
     content: Buffer.from(masterJSON).toString('base64'),
     branch: defaultBranch
   })

@@ -1,72 +1,94 @@
-/* eslint-disable @typescript-eslint/no-require-imports */
-/* eslint-disable @typescript-eslint/no-var-requires */
 import twilio from 'twilio'
 import * as core from '@actions/core'
 import * as github from '@actions/github'
 import * as handler from './handler'
 
-require('dotenv').config()
-
-async function run(): Promise<string> {
+async function run(): Promise<void> {
   const {payload, eventName} = github.context
   const {
     ref: branch,
     ref_type: refType,
-    sender,
-    repository,
+    sender = {
+      login: ''
+    },
+    repository = {
+      default_branch: 'main',
+      name: '',
+      owner: {
+        login: ''
+      }
+    },
     pull_request: pullRequest
   } = payload
-  const masterFlow = core.getInput('masterFlow')
-  const githubToken = core.getInput('githubToken')
 
-  const accountSid =
-    core.getInput('TWILIO_ACCOUNT_SID') || process.env.TWILIO_ACCOUNT_SID
-  const apiKey = core.getInput('TWILIO_API_KEY') || process.env.TWILIO_API_KEY
-  const apiSecret =
-    core.getInput('TWILIO_API_SECRET') || process.env.TWILIO_API_SECRET
+  // Inputs
+  const masterFlow = core.getInput('twilio-master-flow-sid')
+  const githubToken = core.getInput('github-token')
 
-  core.debug('Creating Flow')
-  // console.log(JSON.stringify(github))
+  // Secrets
+  const productionAccountSid = core.getInput('TWILIO_ACCOUNT_SID_PRODUCTION')
+  const productionApiKey = core.getInput('TWILIO_API_KEY_PRODUCTION')
+  const productionApiSecret = core.getInput('TWILIO_API_SECRET_PRODUCTION')
 
-  // eslint-disable-next-line no-console
-  console.log('Token::: ', process.env.GITHUB_TOKEN)
+  const developmentAccountSid = core.getInput('TWILIO_ACCOUNT_SID_DEVELOPMENT')
+  const developmentApiKey = core.getInput('TWILIO_API_KEY_DEVELOPMENT')
+  const developmentApiSecret = core.getInput('TWILIO_API_SECRET_DEVELOPMENT')
 
-  const client = twilio(apiKey, apiSecret, {accountSid})
-
-  const config = {
-    client,
-    githubToken,
-    masterFlow,
-    branch,
-    githubUsername: sender?.login || '',
-    repo: repository?.name || '',
-    owner: repository?.owner.login || '',
-    defaultBranch: repository?.default_branch || 'main'
+  if (!githubToken) {
+    return core.setFailed(`github-token is required but got ${githubToken}`)
   }
 
-  let flowInstanceSid = ''
+  if (!productionAccountSid || !productionApiKey || !productionApiSecret) {
+    return core.setFailed(
+      'Twilio credentials required for production environment'
+    )
+  }
 
-  // studio/* branch created
+  if (!developmentAccountSid || !developmentApiKey || !developmentApiSecret) {
+    return core.setFailed(
+      'Twilio credentials required for development environment'
+    )
+  }
+
+  // Twilio Client
+  const productionClient = twilio(productionAccountSid, productionApiKey, {
+    accountSid: productionApiSecret
+  })
+
+  const developmentClient = twilio(developmentApiKey, developmentApiSecret, {
+    accountSid: developmentAccountSid
+  })
+
+  core.debug('Creating Flow')
+
+  const config = {
+    branch,
+    masterFlow,
+    githubToken,
+    developmentClient,
+    client: {
+      production: productionClient,
+      development: developmentClient
+    },
+    githubUsername: sender.login,
+    repo: repository.name,
+    owner: repository.owner.login,
+    defaultBranch: repository.deault_branch
+  }
+
+  // Trigger: studio/* branch created
   if (eventName === 'create' && refType === 'branch') {
-    if (!branch.startsWith('studio/')) {
-      core.debug(`ignoring: "${branch}" does not match /^studio-/`)
-    } else {
-      flowInstanceSid = await handler.create(config)
+    if (branch.startsWith('studio/')) {
+      await handler.create(config)
     }
   }
 
-  // studio/* merge to main accepted
-  if (eventName === 'pull_request') {
-    if (pullRequest && !pullRequest?.merged) {
+  // Trigger: studio/* merge to main branch accepted
+  if (eventName === 'pull_request' && pullRequest) {
+    if (!pullRequest.merged) {
       await handler.merge({...config, branch: pullRequest.head.ref})
     }
   }
-
-  // core.debug('Flow Created!')
-
-  // core.setOutput('flowSid', flowInstanceSid)
-
-  return flowInstanceSid
 }
 
 async function execute(): Promise<string | void> {
