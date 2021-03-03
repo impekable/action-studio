@@ -1,6 +1,6 @@
 # Impekable Twilio Studio GitHub Action
 
-Automated version control for Twilio Studio Flows.
+Automated access and version control for Twilio Studio.
 
 ## Prerequisites
 

@@ -1,6 +1,6 @@
 name: 'Impekable Twilio Studio Control'
 author: 'Impekable'
-description: 'Automated version control for Twilio Studio Flows'
+description: 'Automated access and version control for Twilio Studio'
 inputs:
   twilio-master-flow-sid:
     description: 'The sid of the main flow that you want the development flows to be based on'
