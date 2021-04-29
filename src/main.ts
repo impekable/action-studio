@@ -26,14 +26,6 @@ async function run(): Promise<void> {
   const githubToken = core.getInput('github-token')
 
   // Secrets
-  // const productionAccountSid = core.getInput('TWILIO_ACCOUNT_SID_PRODUCTION')
-  // const productionApiKey = core.getInput('TWILIO_API_KEY_PRODUCTION')
-  // const productionApiSecret = core.getInput('TWILIO_API_SECRET_PRODUCTION')
-
-  // const developmentAccountSid = core.getInput('TWILIO_ACCOUNT_SID_DEVELOPMENT')
-  // const developmentApiKey = core.getInput('TWILIO_API_KEY_DEVELOPMENT')
-  // const developmentApiSecret = core.getInput('TWILIO_API_SECRET_DEVELOPMENT')
-
   const productionAccountSid = process.env.TWILIO_ACCOUNT_SID_PRODUCTION
   const productionApiKey = process.env.TWILIO_API_KEY_PRODUCTION
   const productionApiSecret = process.env.TWILIO_API_SECRET_PRODUCTION
@@ -45,9 +37,6 @@ async function run(): Promise<void> {
   if (!githubToken) {
     return core.setFailed(`github-token is required but got ${githubToken}`)
   }
-
-  // eslint-disable-next-line no-console
-  console.log({productionAccountSid, productionApiKey, productionApiSecret})
 
   if (!productionAccountSid || !productionApiKey || !productionApiSecret) {
     return core.setFailed(
@@ -62,8 +51,8 @@ async function run(): Promise<void> {
   }
 
   // Twilio Client
-  const productionClient = twilio(productionAccountSid, productionApiKey, {
-    accountSid: productionApiSecret
+  const productionClient = twilio(productionApiKey, productionApiSecret, {
+    accountSid: productionAccountSid
   })
 
   const developmentClient = twilio(developmentApiKey, developmentApiSecret, {
