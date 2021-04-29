@@ -26,13 +26,21 @@ async function run(): Promise<void> {
   const githubToken = core.getInput('github-token')
 
   // Secrets
-  const productionAccountSid = core.getInput('TWILIO_ACCOUNT_SID_PRODUCTION')
-  const productionApiKey = core.getInput('TWILIO_API_KEY_PRODUCTION')
-  const productionApiSecret = core.getInput('TWILIO_API_SECRET_PRODUCTION')
+  // const productionAccountSid = core.getInput('TWILIO_ACCOUNT_SID_PRODUCTION')
+  // const productionApiKey = core.getInput('TWILIO_API_KEY_PRODUCTION')
+  // const productionApiSecret = core.getInput('TWILIO_API_SECRET_PRODUCTION')
 
-  const developmentAccountSid = core.getInput('TWILIO_ACCOUNT_SID_DEVELOPMENT')
-  const developmentApiKey = core.getInput('TWILIO_API_KEY_DEVELOPMENT')
-  const developmentApiSecret = core.getInput('TWILIO_API_SECRET_DEVELOPMENT')
+  // const developmentAccountSid = core.getInput('TWILIO_ACCOUNT_SID_DEVELOPMENT')
+  // const developmentApiKey = core.getInput('TWILIO_API_KEY_DEVELOPMENT')
+  // const developmentApiSecret = core.getInput('TWILIO_API_SECRET_DEVELOPMENT')
+
+  const productionAccountSid = process.env.TWILIO_ACCOUNT_SID_PRODUCTION
+  const productionApiKey = process.env.TWILIO_API_KEY_PRODUCTION
+  const productionApiSecret = process.env.TWILIO_API_SECRET_PRODUCTION
+
+  const developmentAccountSid = process.env.TWILIO_ACCOUNT_SID_DEVELOPMENT
+  const developmentApiKey = process.env.TWILIO_API_KEY_DEVELOPMENT
+  const developmentApiSecret = process.env.TWILIO_API_SECRET_DEVELOPMENT
 
   if (!githubToken) {
     return core.setFailed(`github-token is required but got ${githubToken}`)
