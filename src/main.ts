@@ -38,6 +38,7 @@ async function run(): Promise<void> {
     return core.setFailed(`github-token is required but got ${githubToken}`)
   }
 
+  // eslint-disable-next-line no-console
   console.log({productionAccountSid, productionApiKey, productionApiSecret})
 
   if (!productionAccountSid || !productionApiKey || !productionApiSecret) {

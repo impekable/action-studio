@@ -12,7 +12,7 @@
     "package": "ncc build --source-map --license licenses.txt",
     "test": "jest",
     "release": "npm run package && npm test",
-    "all": "npm run build && npm run format && npm run lint && npm run release"
+    "all": "npm run build && npm run format && npm run lint && npm run package"
   },
   "bugs": {
     "url": "https://github.com/impekable/actions-studio/issues"
