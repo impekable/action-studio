@@ -38,6 +38,8 @@ async function run(): Promise<void> {
     return core.setFailed(`github-token is required but got ${githubToken}`)
   }
 
+  console.log({productionAccountSid, productionApiKey, productionApiSecret})
+
   if (!productionAccountSid || !productionApiKey || !productionApiSecret) {
     return core.setFailed(
       'Twilio credentials required for production environment'
