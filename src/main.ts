@@ -85,7 +85,7 @@ async function run(): Promise<void> {
 
   // Trigger: studio/* merge to main branch accepted
   if (eventName === 'pull_request' && pullRequest) {
-    if (!pullRequest.merged) {
+    if (pullRequest.merged) {
       await handler.merge({...config, branch: pullRequest.head.ref})
     }
   }
